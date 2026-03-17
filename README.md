@@ -8,3 +8,10 @@
 * Symulacja konfliktu 
 * Automatyzacja z GitHub Actions
 
+Uruchomienie projektu:
+```bash
+npm i
+npm start
+```
+
+Link do dokumentacji NodeJS: https://nodejs.org/api/all.html
