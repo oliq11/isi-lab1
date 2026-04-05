@@ -10,5 +10,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "sequelize": "^6.37.8",
+    "sqlite3": "^6.0.1"
+  }
 }
