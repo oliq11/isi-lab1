@@ -1,6 +1,13 @@
 import express from 'express';
 const router = express.Router();
 import { Post } from './models/Post.js';
+import { getCityForecast24h } from './services/open_meteo.js';
+
+const SUCHY_DWOR = {
+    name: 'Suchy Dwór (Pomorskie)',
+    latitude: 54.5744,
+    longitude: 18.466
+};
 
 router.get('/add', (req, res) => {
     res.send(`
@@ -29,10 +36,12 @@ router.post('/add', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const posts = await Post.findAll({ order: [['created_at', 'DESC']] });
-        
+
         let html = `
             <h1>Mój Blog</h1>
             <a href="/blog/add"> + Dodaj nowy post</a>
+            <br>
+            <a href="/blog/weather">Sprawdź pogodę</a>
             <hr>
         `;
 
@@ -55,10 +64,47 @@ router.get('/', async (req, res) => {
     }
 });
 
+router.get('/weather', async (req, res) => {
+    try {
+        const weather = await getCityForecast24h(SUCHY_DWOR);
+        const labelsJson = JSON.stringify(weather.times);
+        const valuesJson = JSON.stringify(weather.temperatures);
+
+        res.send(`
+            <h1>Pogoda - ${weather.cityName}</h1>
+            <p><strong>Aktualna temperatura:</strong> ${weather.currentTemperature.toFixed(1)}°C</p>
+            <p><strong>Współrzędne:</strong> ${weather.latitude}, ${weather.longitude}</p>
+
+            <canvas id="c"></canvas>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                new Chart(document.getElementById('c'), {
+                    type: 'line',
+                    data: {
+                        labels: ${labelsJson},
+                        datasets: [{ label: 'Temp', data: ${valuesJson} }]
+                    }
+                });
+            </script>
+
+            <hr>
+            <a href="/blog">← Powrót do listy</a>
+            `);
+
+    } catch (error) {
+        res.status(500).send(`
+            <h1>Błąd</h1>
+            <p>Nie udało się pobrać danych pogodowych.</p>
+            <pre>${error.message}</pre>
+            <a href="/blog">← Powrót do listy</a>
+        `);
+    }
+});
+
 router.get('/:id', async (req, res) => {
     try {
         const post = await Post.findByPk(req.params.id);
-        
+
         if (!post) {
             return res.status(404).send("<h1>Błąd 404</h1><p>Nie znaleziono wpisu.</p><a href='/blog'>Wróć</a>");
         }
@@ -69,13 +115,14 @@ router.get('/:id', async (req, res) => {
                 <p><strong>Autor: ${post.author}</strong> | <em>Data: ${post.published_at.toLocaleString()}</em></p>
                 <div style="white-space: pre-wrap;">${post.content}</div>
                 <hr>
-                <a href="/blog">← Powrót do listy</a>
+                    <a href="/blog">← Powrót do listy</a>
             </article>
-        `;
+            `;
         res.send(html);
     } catch (error) {
         res.status(500).send("Błąd serwera: " + error.message);
     }
 });
+
 
 export default router;

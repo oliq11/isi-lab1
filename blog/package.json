@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "module",
   "dependencies": {
+    "openmeteo": "^1.2.3",
     "sequelize": "^6.37.8",
     "sqlite3": "^6.0.1"
   }
