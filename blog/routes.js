@@ -161,4 +161,38 @@ router.get('/:id', async (req, res) => {
 });
 
 
+// JSON API: zwraca przetworzone dane pogodowe
+router.get('/api/weather', async (req, res) => {
+    try {
+        const weather = await getCityForecast24h(SUCHY_DWOR);
+        return res.json({
+            cityName: weather.cityName,
+            latitude: weather.latitude,
+            longitude: weather.longitude,
+            currentTemperature: Number(weather.currentTemperature),
+            averageTemperature: Number(weather.averageTemperature),
+            times: weather.times,
+            temperatures: weather.temperatures
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to fetch weather', message: error.message });
+    }
+});
+
+// JSON API: zwraca przetworzone dane świąt
+router.get('/api/holidays', async (req, res) => {
+    try {
+        const data = await getHolidaysData(2026, 'PL');
+        return res.json({
+            total: data.total ?? data.length ?? null,
+            globalTotal: data.globalTotal,
+            monthlyStats: data.monthlyStats,
+            holidays: data.holidays
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Failed to fetch holidays', message: error.message });
+    }
+});
+
+
 export default router;
