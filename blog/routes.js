@@ -43,9 +43,10 @@ router.get('/weather', async (req, res) => {
 
         res.send(`
             <h1>Pogoda - ${weather.cityName}</h1>
-            <p><strong>Aktualna temperatura:</strong> ${weather.currentTemperature.toFixed(1)}°C</p>
+            
             <p><strong>Współrzędne:</strong> ${weather.latitude}, ${weather.longitude}</p>
-
+            <p><strong>Aktualna temperatura:</strong> ${weather.currentTemperature.toFixed(1)}°C</p>
+            <p><strong>Średnia temperatura (następne 24h):</strong> ${weather.averageTemperature}°C</p>
             <canvas id="c"></canvas>
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
@@ -87,9 +88,9 @@ router.get('/holidays', async (req, res) => {
             <h1>Dni wolne 2026</h1>
             
             <section>
+                <p><strong>Suma świąt ogólnokrajowych:</strong> ${data.globalTotal}</p>
                 <h3>Statystyki miesięczne:</h3>
                 <ul>${statsHtml}</ul>
-                <p><strong>Suma świąt ogólnokrajowych:</strong> ${data.globalTotal}</p>
             </section>
 
             <h3>Lista wszystkich świąt:</h3>
@@ -103,19 +104,19 @@ router.get('/holidays', async (req, res) => {
     }
 });
 
-router.get('/api/holidays-summary', async (req, res) => {
-    try {
-        const data = await getHolidaysData(2026, 'PL');
-        res.json({
-            country: 'PL',
-            year: 2026,
-            totalHolidays: data.globalTotal,
-            monthStats: data.monthlyStats
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
+// router.get('/api/holidays-summary', async (req, res) => {
+//     try {
+//         const data = await getHolidaysData(2026, 'PL');
+//         res.json({
+//             country: 'PL',
+//             year: 2026,
+//             totalHolidays: data.globalTotal,
+//             monthStats: data.monthlyStats
+//         });
+//     } catch (error) {
+//         res.status(500).json({ error: error.message });
+//     }
+// });
 
 router.get('/', async (req, res) => {
     try {

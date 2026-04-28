@@ -50,12 +50,16 @@ export async function getCityForecast24h() {
     const next24Times = hourlyTimes.slice(startIndex, startIndex + 24);
     const next24Temps = hourlyTemps.slice(startIndex, startIndex + 24);
 
+    const sum = next24Temps.reduce((a, b) => a + Number(b), 0);
+    const averageTemp = sum / next24Temps.length;
+
     return {
         cityName: place.name,
         latitude: place.latitude,
         longitude: place.longitude,
         currentTemperature: Number(next24Temps[0]),
         times: next24Times.map(formatHourLabel),
+        averageTemperature: averageTemp.toFixed(2),
         temperatures: next24Temps.map(function (v) { return Number(v); })
     };
 }
