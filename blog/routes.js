@@ -47,18 +47,29 @@ router.get('/weather', async (req, res) => {
             <p><strong>Współrzędne:</strong> ${weather.latitude}, ${weather.longitude}</p>
             <p><strong>Aktualna temperatura:</strong> ${weather.currentTemperature.toFixed(1)}°C</p>
             <p><strong>Średnia temperatura (następne 24h):</strong> ${weather.averageTemperature}°C</p>
-            <canvas id="c"></canvas>
+            <div style="max-width:1500px;">
+                <canvas id="c" style="width:100%;height:500px;display:flex;"></canvas>
+            </div>
+
             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
             <script>
-                new Chart(document.getElementById('c'), {
+                const ctx = document.getElementById('c').getContext('2d');
+                new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: ${labelsJson},
-                        datasets: [{ label: 'Temp', data: ${valuesJson} }]
+                    labels: ${labelsJson},
+                    datasets: [{ label: 'Temp', data: ${valuesJson}, borderColor: 'rgb(54, 119, 163)', fill: false }]
+                    },
+                    options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { display: true },
+                        y: { display: true, beginAtZero: false }
+                    }
                     }
                 });
             </script>
-
             <hr>
             <a href="/blog">← Powrót do listy</a>
             `);
