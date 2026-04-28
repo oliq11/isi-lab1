@@ -1,7 +1,9 @@
 import express from 'express';
 const router = express.Router();
 import { Post } from './models/Post.js';
+
 import { getCityForecast24h } from './services/open_meteo.js';
+import { getHolidaysData } from './services/nager-date.js';
 
 const SUCHY_DWOR = {
     name: 'Suchy Dwór (Pomorskie)',
@@ -19,7 +21,7 @@ router.get('/add', (req, res) => {
             <button type="submit">Zapisz w bazie</button>
         </form>
         <hr>
-        <a href="/blog">Wróć do listy</a>
+        <a href="/blog">← Powrót do listy</a>
     `);
 });
 
@@ -30,37 +32,6 @@ router.post('/add', async (req, res) => {
         res.redirect('/blog');
     } catch (error) {
         res.status(500).send("Błąd zapisu: " + error.message);
-    }
-});
-
-router.get('/', async (req, res) => {
-    try {
-        const posts = await Post.findAll({ order: [['created_at', 'DESC']] });
-
-        let html = `
-            <h1>Mój Blog</h1>
-            <a href="/blog/add"> + Dodaj nowy post</a>
-            <br>
-            <a href="/blog/weather">Sprawdź pogodę</a>
-            <hr>
-        `;
-
-        if (posts.length === 0) {
-            html += '<p>Brak postów do wyświetlenia.</p>';
-        } else {
-            posts.forEach(post => {
-                html += `
-                    <article>
-                        <h2><a href="/blog/${post.id}">${post.title}</a></h2>
-                        <small>Autor: ${post.author} | Data: ${post.published_at.toLocaleDateString()}</small>
-                    </article>
-                    <hr>
-                `;
-            });
-        }
-        res.send(html);
-    } catch (error) {
-        res.status(500).send("Błąd bazy danych: " + error.message);
     }
 });
 
@@ -100,6 +71,83 @@ router.get('/weather', async (req, res) => {
         `);
     }
 });
+
+router.get('/holidays', async (req, res) => {
+    try {
+        const data = await getHolidaysData(2026, 'PL');
+
+        let listHtml = data.holidays.map(h => `<li>${h.date}: ${h.localName}</li>`).join('');
+
+        let statsHtml = Object.entries(data.monthlyStats).map(([month, count]) => {
+            const monthName = new Date(2026, month - 1).toLocaleString('pl-PL', { month: 'long' });
+            return `<li>${monthName}: <strong>${count}</strong> dni wolnych</li>`;
+        }).join('');
+
+        res.send(`
+            <h1>Dni wolne 2026</h1>
+            
+            <section>
+                <h3>Statystyki miesięczne:</h3>
+                <ul>${statsHtml}</ul>
+                <p><strong>Suma świąt ogólnokrajowych:</strong> ${data.globalTotal}</p>
+            </section>
+
+            <h3>Lista wszystkich świąt:</h3>
+            <ul>${listHtml}</ul>
+            
+            <hr>
+            <a href="/blog">← Powrót do listy</a>
+        `);
+    } catch (error) {
+        res.status(500).send("Błąd świąt: " + error.message);
+    }
+});
+
+router.get('/api/holidays-summary', async (req, res) => {
+    try {
+        const data = await getHolidaysData(2026, 'PL');
+        res.json({
+            country: 'PL',
+            year: 2026,
+            totalHolidays: data.globalTotal,
+            monthStats: data.monthlyStats
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/', async (req, res) => {
+    try {
+        const posts = await Post.findAll({ order: [['created_at', 'DESC']] });
+
+        let html = `
+            <h1>Mój Blog</h1>
+            <a href="/blog/add"> + Dodaj nowy post</a> | 
+            <a href="/blog/weather">Sprawdź pogodę</a> | 
+            <a href="/blog/holidays">Sprawdź święta</a>
+            <hr>
+        `;
+
+        if (posts.length === 0) {
+            html += '<p>Brak postów do wyświetlenia.</p>';
+        } else {
+            posts.forEach(post => {
+                html += `
+                    <article>
+                        <h2><a href="/blog/${post.id}">${post.title}</a></h2>
+                        <small>Autor: ${post.author} | Data: ${post.published_at.toLocaleDateString()}</small>
+                    </article>
+                    <hr>
+                `;
+            });
+        }
+        res.send(html);
+    } catch (error) {
+        res.status(500).send("Błąd bazy danych: " + error.message);
+    }
+});
+
 
 router.get('/:id', async (req, res) => {
     try {
