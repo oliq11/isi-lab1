@@ -88,11 +88,12 @@ router.get('/holidays', async (req, res) => {
             <h1>Dni wolne 2026</h1>
             
             <section>
-                <p><strong>Suma świąt ogólnokrajowych:</strong> ${data.globalTotal}</p>
+                <h3><strong>Suma świąt w roku:</strong> ${data.globalTotal}</h3>
+                <hr>
                 <h3>Statystyki miesięczne:</h3>
                 <ul>${statsHtml}</ul>
             </section>
-
+            <hr>
             <h3>Lista wszystkich świąt:</h3>
             <ul>${listHtml}</ul>
             
@@ -103,20 +104,6 @@ router.get('/holidays', async (req, res) => {
         res.status(500).send("Błąd świąt: " + error.message);
     }
 });
-
-// router.get('/api/holidays-summary', async (req, res) => {
-//     try {
-//         const data = await getHolidaysData(2026, 'PL');
-//         res.json({
-//             country: 'PL',
-//             year: 2026,
-//             totalHolidays: data.globalTotal,
-//             monthStats: data.monthlyStats
-//         });
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// });
 
 router.get('/', async (req, res) => {
     try {
