@@ -6,6 +6,10 @@ const app = express();
 
 app.use(express.urlencoded({ extended: true }));
 
+app.get('/', (req, res) => {
+    res.redirect('/blog');
+});
+
 app.use('/blog', blogRoutes);
 
 sequelize.sync().then(() => {
