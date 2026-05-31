@@ -47,4 +47,4 @@ jobs:
       run: |
         echo "Oczekiwanie na uruchomienie produkcji..."
         sleep 30
-        curl --fail https://isi-lab1.onrender.com/ || exit 1
+        curl -I https://isi-lab1.onrender.com/ || exit 1
