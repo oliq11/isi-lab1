@@ -1,0 +1,50 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, feature/cicd-automation ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Cache Node.js modules
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install dependencies
+      working-directory: ./blog
+      run: npm install
+
+    - name: Run Unit Tests
+      working-directory: ./blog
+      run: npm test
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: github.ref_name == 'feature/cicd-automation' || github.ref_name == 'main'
+    steps:
+    - name: Trigger Render Deploy Hook
+      run: |
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+    
+    - name: Sanity Check (Verify production endpoint)
+      run: |
+        echo "Oczekiwanie na uruchomienie produkcji..."
+        sleep 30
+        curl -I https://isi-lab1.onrender.com/ || exit 1

@@ -4,7 +4,7 @@ const formatStatus = (status) => `Status: ${status}`;
 describe('Testy jednostkowe aplikacji blogowej', () => {
   
   test('Powinien poprawnie zsumować dwie liczby', () => {
-    expect(sum(2, 3)).toBe(10);
+    expect(sum(2, 3)).toBe(5);
   });
 
   test('Powinien poprawnie sformatować status stringa', () => {
